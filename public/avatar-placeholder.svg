@@ -1,0 +1,8 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" rx="40" fill="#0F172A"/>
+  <rect x="2" y="2" width="396" height="396" rx="38" stroke="#1E293B" stroke-width="4"/>
+  <circle cx="200" cy="150" r="60" fill="#6366F1" fill-opacity="0.2" stroke="#818CF8" stroke-width="4"/>
+  <path d="M90 320C90 259.249 139.249 210 200 210C260.751 210 310 259.249 310 320" stroke="#818CF8" stroke-width="4" stroke-linecap="round"/>
+  <text x="200" y="158" text-anchor="middle" fill="#F8FAFC" font-family="sans-serif" font-weight="bold" font-size="32">WK</text>
+  <text x="200" y="360" text-anchor="middle" fill="#94A3B8" font-family="sans-serif" font-size="14">Waqar Khan • Profile Avatar</text>
+</svg>

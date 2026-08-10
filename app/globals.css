@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------- */
+/* GLOBAL THEME & CUSTOM STYLES — Clean Light Personal-Brand                  */
+/* -------------------------------------------------------------------------- */
+/*
+ * Minimal light theme: white background, dark text, single red accent color.
+ * No glassmorphism, no dark mode glow effects — clean and professional.
+ */
+
+:root {
+  --background: #ffffff;
+  --surface: #f9fafb;
+  --surface-border: #e5e7eb;
+  --foreground: #111827;
+  --muted: #6b7280;
+  --accent: #DC2626;
+  --accent-light: #EF4444;
+  --accent-dark: #B91C1C;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle light scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Clean card style — white bg, light border, subtle shadow */
+.clean-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.clean-card-hover {
+  transition: all 0.2s ease;
+}
+.clean-card-hover:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+/* Glass-card kept as alias for backward compat — now renders as clean-card */
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.glass-card-hover {
+  transition: all 0.2s ease;
+}
+.glass-card-hover:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
