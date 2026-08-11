@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(projects);
       }
     } catch (dbErr) {
-      console.warn('MongoDB query warning in /api/projects, executing GitHub API fallback:', dbErr);
+      // MongoDB connection unavailable or timed out; execute GitHub API fallback silently
     }
 
     // Fallback: fetch live GitHub repositories

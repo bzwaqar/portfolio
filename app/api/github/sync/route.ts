@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
         total_projects: syncedCount + updatedCount,
       });
     } catch (dbErr: any) {
-      console.warn('MongoDB sync warning in /api/github/sync:', dbErr);
       return NextResponse.json({
         status: 'partial_success',
         message: 'GitHub repositories fetched successfully (MongoDB update pending).',
