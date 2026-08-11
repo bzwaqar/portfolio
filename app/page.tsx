@@ -40,38 +40,99 @@ export const metadata: Metadata = {
   },
 };
 
-// Revalidate occasionally so new projects show up
-export const revalidate = 3600;
+import { fetchGitHubUserRepos } from '@/lib/github';
 
 async function getFeaturedProjects(): Promise<Project[]> {
   try {
     const db = await getDb();
     
-    // First, try to specifically get the FIFA project
-    const fifaProject = await db.collection('projects').findOne({ 
-      slug: { $regex: /fifa/i } 
-    });
-
-    // Then get top projects by stars or recency, excluding the FIFA project if we found it
-    const excludeIds = fifaProject ? [fifaProject._id] : [];
-    
-    const otherProjectsCursor = db.collection('projects')
-      .find({ _id: { $nin: excludeIds } })
-      .sort({ stars: -1, updated_at: -1 })
-      .limit(fifaProject ? 5 : 6);
+    // Get top published projects excluding portfolio repo
+    const projectsCursor = db.collection('projects')
+      .find({ slug: { $ne: 'portfolio' }, name: { $ne: 'portfolio' } })
+      .sort({ featured: -1, stars: -1, updated_at: -1 });
       
-    const otherProjects = await otherProjectsCursor.toArray();
+    const allDbProjects = await projectsCursor.toArray();
 
-    // Combine them, putting FIFA first or mixed in (we'll just put it first)
-    const combined = fifaProject ? [fifaProject, ...otherProjects] : otherProjects;
-    
-    // Map _id to string to avoid serialization issues
-    return combined.map(p => ({
-      ...p,
-      _id: p._id.toString()
-    })) as unknown as Project[];
+    if (allDbProjects && allDbProjects.length > 0) {
+      let top6 = allDbProjects.slice(0, 6);
+      
+      // 1. Replace bookstore with FIFA project
+      const fifaProj = allDbProjects.find((p) => (p.slug || p.name || '').toLowerCase().includes('fifa'));
+      if (fifaProj) {
+        const bookstoreIdx = top6.findIndex((p) => (p.slug || p.name || '').toLowerCase().includes('bookstore'));
+        if (bookstoreIdx !== -1) {
+          top6[bookstoreIdx] = fifaProj;
+        } else if (!top6.some((p) => (p.slug || p.name || '').toLowerCase().includes('fifa'))) {
+          top6[4] = fifaProj;
+        }
+      }
+
+      // 2. Replace artwork with PixSearch project
+      const pixProj = allDbProjects.find((p) => (p.slug || p.name || '').toLowerCase().includes('pixsearch'));
+      if (pixProj) {
+        const artworkIdx = top6.findIndex((p) => (p.slug || p.name || '').toLowerCase().includes('artwork'));
+        if (artworkIdx !== -1) {
+          top6[artworkIdx] = pixProj;
+        } else if (!top6.some((p) => (p.slug || p.name || '').toLowerCase().includes('pixsearch'))) {
+          top6[2] = pixProj;
+        }
+      }
+
+      return top6.map(p => ({
+        ...p,
+        _id: p._id.toString()
+      })) as unknown as Project[];
+    }
   } catch (error) {
-    console.error('Failed to fetch featured projects:', error);
+    console.warn('MongoDB fetch for featured projects failed, falling back to GitHub API:', error);
+  }
+
+  // Fallback: fetch live GitHub repos, excluding portfolio
+  try {
+    const repos = await fetchGitHubUserRepos('bzwaqar');
+    const filteredRepos = repos.filter((r) => r.name.toLowerCase() !== 'portfolio');
+
+    let top6 = filteredRepos.slice(0, 6);
+
+    // 1. Replace bookstore with FIFA repo
+    const fifaRepo = filteredRepos.find((r) => r.name.toLowerCase().includes('fifa'));
+    if (fifaRepo) {
+      const bookstoreIdx = top6.findIndex((r) => r.name.toLowerCase().includes('bookstore'));
+      if (bookstoreIdx !== -1) {
+        top6[bookstoreIdx] = fifaRepo;
+      } else if (!top6.some((r) => r.name.toLowerCase().includes('fifa'))) {
+        top6[4] = fifaRepo;
+      }
+    }
+
+    // 2. Replace artwork with PixSearch repo
+    const pixRepo = filteredRepos.find((r) => r.name.toLowerCase().includes('pixsearch'));
+    if (pixRepo) {
+      const artworkIdx = top6.findIndex((r) => r.name.toLowerCase().includes('artwork'));
+      if (artworkIdx !== -1) {
+        top6[artworkIdx] = pixRepo;
+      } else if (!top6.some((r) => r.name.toLowerCase().includes('pixsearch'))) {
+        top6[2] = pixRepo;
+      }
+    }
+
+    return top6.map((r) => ({
+      _id: String(r.github_id),
+      name: r.name,
+      title: r.name,
+      slug: r.name.toLowerCase(),
+      short_description: r.description,
+      description: r.description,
+      github_url: r.html_url,
+      demo_url: r.demo_url,
+      languages: [r.language],
+      technologies: r.topics,
+      image: r.image_url ? { url: r.image_url, alt: r.image_alt || r.name } : undefined,
+      featured: true,
+      published: true,
+    })) as unknown as Project[];
+  } catch (err) {
+    console.error('Failed to load fallback featured projects:', err);
     return [];
   }
 }

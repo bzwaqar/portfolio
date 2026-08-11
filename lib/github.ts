@@ -21,9 +21,34 @@ export interface GitHubRepository {
   updated_at: string;
   image_url?: string;
   image_alt?: string;
+  demo_url?: string;
 }
 
 export const PROJECT_IMAGE_MAP: Record<string, { url: string; alt: string }> = {
+  'ai-artwork-retrieval': {
+    url: '/images/projects/ai-artwork-retrieval.webp',
+    alt: 'AI Artwork Retrieval project preview',
+  },
+  'ai-tech-stack-recommender': {
+    url: '/images/projects/ai-tech-stack-recommender.webp',
+    alt: 'AI Tech Stack Recommender project preview',
+  },
+  'amazon-review-intelligence': {
+    url: '/images/projects/amazon-review-intelligence.webp',
+    alt: 'Amazon Review Intelligence project preview',
+  },
+  'breast_cancer_prediction': {
+    url: '/images/projects/breast_cancer_prediction.webp',
+    alt: 'Breast Cancer Prediction ML project preview',
+  },
+  'breast-cancer-prediction': {
+    url: '/images/projects/breast_cancer_prediction.webp',
+    alt: 'Breast Cancer Prediction ML project preview',
+  },
+  'ocr-vision-pipeline': {
+    url: '/images/projects/ocr-vision-pipeline.webp',
+    alt: 'OCR Vision Pipeline project preview',
+  },
   'pixsearch': {
     url: '/images/projects/artificial-intelligence-computer-vision-image-search.webp',
     alt: 'AI image search and computer vision project',
@@ -57,7 +82,7 @@ export const PROJECT_IMAGE_MAP: Record<string, { url: string; alt: string }> = {
     alt: 'Customer analytics and business data segmentation',
   },
   'social-media-engagement-clustering-application': {
-    url: '/images/projects/social-media-analytics-data-visualization.webp',
+    url: '/images/projects/social-media-engagement-clustering.webp',
     alt: 'Social media engagement analytics and data clustering',
   },
   'bbc-news-advanced-nlp': {
@@ -109,13 +134,24 @@ export function getProjectImage(project: any): { url: string; alt: string } | nu
   }
 
   // 3. Match by slug / name in fallback map
-  const slug = (project.slug || project.name || '').toLowerCase().trim();
-  if (PROJECT_IMAGE_MAP[slug]) {
-    return PROJECT_IMAGE_MAP[slug];
+  const rawSlug = (project.slug || project.name || '').toLowerCase().trim();
+  const normalizedSlug = rawSlug.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+  if (PROJECT_IMAGE_MAP[rawSlug]) {
+    return PROJECT_IMAGE_MAP[rawSlug];
+  }
+  if (PROJECT_IMAGE_MAP[normalizedSlug]) {
+    return PROJECT_IMAGE_MAP[normalizedSlug];
   }
 
   for (const [key, val] of Object.entries(PROJECT_IMAGE_MAP)) {
-    if (slug === key || slug.includes(key) || key.includes(slug)) {
+    const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (
+      rawSlug === key ||
+      normalizedSlug === normalizedKey ||
+      normalizedSlug.includes(normalizedKey) ||
+      normalizedKey.includes(normalizedSlug)
+    ) {
       return val;
     }
   }
@@ -133,24 +169,26 @@ export async function fetchGitHubUserRepos(username: string = 'bzwaqar'): Promis
     if (backendResponse && backendResponse.ok) {
       const data = await backendResponse.json();
       if (Array.isArray(data) && data.length > 0) {
-        return data.map((p: any) => {
-          const img = getProjectImage(p);
-          return {
-            github_id: p.github_id || 0,
-            name: p.title || p.name,
-            full_name: `bzwaqar/${p.slug || p.name}`,
-            html_url: p.github_url || `https://github.com/bzwaqar/${p.slug}`,
-            description: p.short_description || p.description || 'GitHub project.',
-            language: (p.languages && p.languages[0]) || p.language || 'Python',
-            stargazers_count: p.stars || 0,
-            forks_count: p.forks || 0,
-            topics: p.topics || [],
-            is_fork: false,
-            updated_at: p.updated_at || new Date().toISOString(),
-            image_url: img?.url,
-            image_alt: img?.alt,
-          };
-        });
+        return data
+          .filter((p: any) => (p.slug || p.name || '').toLowerCase() !== 'portfolio')
+          .map((p: any) => {
+            const img = getProjectImage(p);
+            return {
+              github_id: p.github_id || 0,
+              name: p.title || p.name,
+              full_name: `bzwaqar/${p.slug || p.name}`,
+              html_url: p.github_url || `https://github.com/bzwaqar/${p.slug}`,
+              description: p.short_description || p.description || 'GitHub project.',
+              language: (p.languages && p.languages[0]) || p.language || 'Python',
+              stargazers_count: p.stars || 0,
+              forks_count: p.forks || 0,
+              topics: p.topics || [],
+              is_fork: false,
+              updated_at: p.updated_at || new Date().toISOString(),
+              image_url: img?.url,
+              image_alt: img?.alt,
+            };
+          });
       }
     }
 
@@ -173,7 +211,7 @@ export async function fetchGitHubUserRepos(username: string = 'bzwaqar'): Promis
     }
 
     return rawRepos
-      .filter((repo: any) => !repo.fork)
+      .filter((repo: any) => !repo.fork && repo.name.toLowerCase() !== 'portfolio')
       .map((repo: any) => {
         const img = getProjectImage(repo);
         return {

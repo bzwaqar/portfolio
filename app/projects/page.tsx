@@ -29,7 +29,8 @@ export default function ProjectsPage() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            setProjects(data);
+            const filteredData = data.filter((p: any) => (p.slug || p.name || '').toLowerCase() !== 'portfolio');
+            setProjects(filteredData);
             setLoading(false);
             return;
           }
@@ -44,7 +45,7 @@ export default function ProjectsPage() {
         if (githubRes.ok) {
           const rawRepos = await githubRes.json();
           const normalized = rawRepos
-            .filter((r: any) => !r.fork)
+            .filter((r: any) => !r.fork && r.name.toLowerCase() !== 'portfolio')
             .map((r: any) => {
               const img = getProjectImage(r);
               return {

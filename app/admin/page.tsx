@@ -69,7 +69,7 @@ export default function AdminPage() {
       </div>
 
       {/* Admin Quick Modules Navigation */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         
         {/* Project Management Module Card */}
         <div className="rounded-2xl border-2 border-red-200 bg-white p-8 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
@@ -77,9 +77,9 @@ export default function AdminPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 text-2xl font-bold">
               🛠️
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Project Management Interface</h2>
+            <h2 className="text-xl font-bold text-gray-900">Project Manager</h2>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Sync repositories from GitHub, control public visibility (`published` toggle), highlight top engineering projects (`featured` toggle), edit titles, descriptions, demo URLs, and remove unwanted projects.
+              Sync repositories from GitHub, control public visibility (`published` toggle), highlight top projects (`featured` toggle), and edit metadata.
             </p>
           </div>
 
@@ -89,6 +89,28 @@ export default function AdminPage() {
               className="inline-block rounded-xl bg-red-600 px-5 py-3 text-xs font-bold text-white hover:bg-red-700 transition-colors"
             >
               Open Project Manager →
+            </Link>
+          </div>
+        </div>
+
+        {/* SEO Automation Dashboard Card */}
+        <div className="rounded-2xl border-2 border-red-200 bg-white p-8 space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+          <div className="space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 text-2xl font-bold">
+              🤖
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">SEO Automation System</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Diagnostic SEO Health Scores, audit warnings, broken link checks, AI SEO Assistant draft review, Search Console / Analytics placeholders, and logs.
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-gray-200">
+            <Link
+              href="/admin/seo"
+              className="inline-block rounded-xl bg-red-600 px-5 py-3 text-xs font-bold text-white hover:bg-red-700 transition-colors"
+            >
+              Open SEO Dashboard →
             </Link>
           </div>
         </div>

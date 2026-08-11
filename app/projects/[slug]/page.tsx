@@ -15,6 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { projectsData } from '@/lib/data';
+import { fetchGitHubUserRepos, getProjectImage } from '@/lib/github';
 import { BreadcrumbJsonLd, SoftwareProjectJsonLd } from '@/components/JsonLd';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://waqarkhan.dev';
@@ -25,7 +26,7 @@ interface DynamicProjectPageProps {
   }>;
 }
 
-// Fetch single project helper from MongoDB API or local fallback
+// Fetch single project helper from MongoDB API or local/GitHub fallback
 async function getProjectBySlug(slug: string) {
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   try {
@@ -57,6 +58,32 @@ async function getProjectBySlug(slug: string) {
     };
   }
 
+  // GitHub API / local fallback map fallback
+  try {
+    const repos = await fetchGitHubUserRepos('bzwaqar');
+    const matchedRepo = repos.find(
+      (r) =>
+        r.name.toLowerCase() === slug.toLowerCase() ||
+        (r.full_name && r.full_name.toLowerCase().endsWith(`/${slug.toLowerCase()}`))
+    );
+    if (matchedRepo) {
+      return {
+        title: matchedRepo.name,
+        slug: slug,
+        short_description: matchedRepo.description,
+        description: matchedRepo.description,
+        github_url: matchedRepo.html_url,
+        demo_url: matchedRepo.demo_url,
+        languages: [matchedRepo.language],
+        technologies: matchedRepo.topics,
+        image: matchedRepo.image_url ? { url: matchedRepo.image_url, alt: matchedRepo.image_alt } : null,
+        published: true,
+      };
+    }
+  } catch (ghErr) {
+    console.warn('GitHub fallback load failed for single project:', ghErr);
+  }
+
   return null;
 }
 
@@ -71,6 +98,15 @@ export async function generateStaticParams() {
     }
   } catch (err) {
     // Fallback
+  }
+
+  try {
+    const repos = await fetchGitHubUserRepos('bzwaqar');
+    if (repos.length > 0) {
+      return repos.map((r) => ({ slug: r.name.toLowerCase() }));
+    }
+  } catch (err) {
+    // Fallback to local
   }
 
   return projectsData.map((project) => ({
@@ -94,7 +130,7 @@ export async function generateMetadata({ params }: DynamicProjectPageProps): Pro
   const title = `${project.title || project.name} — AI & Full Stack Project | Waqar Khan`;
   const description = project.short_description || project.description || `Software project built by Waqar Khan.`;
   const canonicalUrl = `${SITE_URL}/projects/${project.slug}`;
-  
+
   const imgObj = project.image || (Array.isArray(project.images) && project.images[0] ? project.images[0] : null);
   const imageUrl = typeof imgObj === 'string' ? imgObj : imgObj?.url ? `${SITE_URL}${imgObj.url}` : `${SITE_URL}/avatar-placeholder.svg`;
 
@@ -145,7 +181,7 @@ export default async function SingleProjectPage({ params }: DynamicProjectPagePr
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 space-y-10">
-      
+
       {/* Schema.org Structured Data */}
       <BreadcrumbJsonLd items={breadcrumbItems} />
       <SoftwareProjectJsonLd
@@ -234,7 +270,7 @@ export default async function SingleProjectPage({ params }: DynamicProjectPagePr
 
       {/* Main Content Sections */}
       <div className="space-y-8 text-slate-300">
-        
+
         {/* Overview */}
         <section className="glass-card rounded-2xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8 space-y-3">
           <h2 className="text-xl font-bold text-white border-l-4 border-indigo-500 pl-3">

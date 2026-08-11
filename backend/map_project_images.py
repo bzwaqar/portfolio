@@ -12,6 +12,31 @@ logger = logging.getLogger(__name__)
 # Map project slugs or keywords to WebP image URLs and natural alt texts
 IMAGE_MAPPINGS = [
     {
+        "keywords": ["artwork", "retrieval"],
+        "url": "/images/projects/ai-artwork-retrieval.webp",
+        "alt": "AI Artwork Retrieval project preview"
+    },
+    {
+        "keywords": ["tech-stack", "recommender"],
+        "url": "/images/projects/ai-tech-stack-recommender.webp",
+        "alt": "AI Tech Stack Recommender project preview"
+    },
+    {
+        "keywords": ["amazon", "review-intelligence"],
+        "url": "/images/projects/amazon-review-intelligence.webp",
+        "alt": "Amazon Review Intelligence project preview"
+    },
+    {
+        "keywords": ["breast_cancer", "breast-cancer"],
+        "url": "/images/projects/breast_cancer_prediction.webp",
+        "alt": "Breast Cancer Prediction ML project preview"
+    },
+    {
+        "keywords": ["ocr", "vision-pipeline"],
+        "url": "/images/projects/ocr-vision-pipeline.webp",
+        "alt": "OCR Vision Pipeline project preview"
+    },
+    {
         "keywords": ["pixsearch"],
         "url": "/images/projects/artificial-intelligence-computer-vision-image-search.webp",
         "alt": "AI image search and computer vision project"
@@ -53,7 +78,7 @@ IMAGE_MAPPINGS = [
     },
     {
         "keywords": ["social-media", "clustering"],
-        "url": "/images/projects/social-media-analytics-data-visualization.webp",
+        "url": "/images/projects/social-media-engagement-clustering.webp",
         "alt": "Social media engagement analytics and data clustering"
     },
     {

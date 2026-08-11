@@ -15,10 +15,10 @@ def convert_project_images():
     print(f"Source Directory: {source_dir}")
     print(f"Target Directory: {target_dir}\n")
 
-    image_extensions = ["*.jpg", "*.jpeg", "*.png"]
+    image_extensions = ["**/*.jpg", "**/*.jpeg", "**/*.png"]
     image_paths = []
     for ext in image_extensions:
-        image_paths.extend(glob.glob(os.path.join(source_dir, ext)))
+        image_paths.extend(glob.glob(os.path.join(source_dir, ext), recursive=True))
 
     print(f"Found {len(image_paths)} existing images in project_Images.\n")
 
