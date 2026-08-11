@@ -44,46 +44,42 @@ import { fetchGitHubUserRepos } from '@/lib/github';
 
 async function getFeaturedProjects(): Promise<Project[]> {
   try {
-    const db = await getDb();
-    const projectsCursor = db.collection('projects')
-      .find({ slug: { $ne: 'portfolio' }, name: { $ne: 'portfolio' } })
-      .sort({ featured: -1, stars: -1, updated_at: -1 });
-      
-    const allDbProjects = await projectsCursor.toArray();
-
-    if (allDbProjects && allDbProjects.length > 0) {
-      const uniqueDbMap = new Map<string, any>();
-      for (const p of allDbProjects) {
-        const key = (p.slug || p.name || '').toLowerCase();
-        if (key && !uniqueDbMap.has(key)) {
-          uniqueDbMap.set(key, p);
-        }
-      }
-      const top6 = Array.from(uniqueDbMap.values()).slice(0, 6);
-
-      return top6.map(p => ({
-        ...p,
-        _id: p._id.toString()
-      })) as unknown as Project[];
-    }
-  } catch (error) {
-    // Fallback to fetchGitHubUserRepos
-  }
-
-  try {
     const repos = await fetchGitHubUserRepos('bzwaqar');
     const filteredRepos = repos.filter((r) => r.name.toLowerCase() !== 'portfolio');
 
-    const uniqueMap = new Map<string, typeof filteredRepos[0]>();
+    const repoMap = new Map<string, typeof filteredRepos[0]>();
     for (const r of filteredRepos) {
-      const key = r.name.toLowerCase();
-      if (!uniqueMap.has(key)) {
-        uniqueMap.set(key, r);
+      repoMap.set(r.name.toLowerCase(), r);
+    }
+
+    const preferredSlugs = [
+      'fifa-match-predictor-ai',
+      'pixsearch',
+      'supportdesk',
+      'ai-tech-stack-recommender',
+      'amazon-review-intelligence',
+      'breast_cancer_prediction',
+    ];
+
+    const selected: typeof filteredRepos = [];
+
+    for (const slug of preferredSlugs) {
+      const matchKey = Array.from(repoMap.keys()).find((k) => k.includes(slug) || slug.includes(k));
+      if (matchKey) {
+        selected.push(repoMap.get(matchKey)!);
+        repoMap.delete(matchKey);
       }
     }
-    const top6 = Array.from(uniqueMap.values()).slice(0, 6);
 
-    return top6.map((r) => ({
+    for (const r of repoMap.values()) {
+      if (selected.length >= 6) break;
+      const name = r.name.toLowerCase();
+      if (!name.includes('artwork') && !name.includes('bookstore')) {
+        selected.push(r);
+      }
+    }
+
+    return selected.map((r) => ({
       _id: String(r.github_id),
       name: r.name,
       title: r.name,
