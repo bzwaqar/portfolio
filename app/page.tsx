@@ -45,8 +45,6 @@ import { fetchGitHubUserRepos } from '@/lib/github';
 async function getFeaturedProjects(): Promise<Project[]> {
   try {
     const db = await getDb();
-    
-    // Get top published projects excluding portfolio repo
     const projectsCursor = db.collection('projects')
       .find({ slug: { $ne: 'portfolio' }, name: { $ne: 'portfolio' } })
       .sort({ featured: -1, stars: -1, updated_at: -1 });
@@ -54,29 +52,14 @@ async function getFeaturedProjects(): Promise<Project[]> {
     const allDbProjects = await projectsCursor.toArray();
 
     if (allDbProjects && allDbProjects.length > 0) {
-      let top6 = allDbProjects.slice(0, 6);
-      
-      // 1. Replace bookstore with FIFA project
-      const fifaProj = allDbProjects.find((p) => (p.slug || p.name || '').toLowerCase().includes('fifa'));
-      if (fifaProj) {
-        const bookstoreIdx = top6.findIndex((p) => (p.slug || p.name || '').toLowerCase().includes('bookstore'));
-        if (bookstoreIdx !== -1) {
-          top6[bookstoreIdx] = fifaProj;
-        } else if (!top6.some((p) => (p.slug || p.name || '').toLowerCase().includes('fifa'))) {
-          top6[4] = fifaProj;
+      const uniqueDbMap = new Map<string, any>();
+      for (const p of allDbProjects) {
+        const key = (p.slug || p.name || '').toLowerCase();
+        if (key && !uniqueDbMap.has(key)) {
+          uniqueDbMap.set(key, p);
         }
       }
-
-      // 2. Replace artwork with PixSearch project
-      const pixProj = allDbProjects.find((p) => (p.slug || p.name || '').toLowerCase().includes('pixsearch'));
-      if (pixProj) {
-        const artworkIdx = top6.findIndex((p) => (p.slug || p.name || '').toLowerCase().includes('artwork'));
-        if (artworkIdx !== -1) {
-          top6[artworkIdx] = pixProj;
-        } else if (!top6.some((p) => (p.slug || p.name || '').toLowerCase().includes('pixsearch'))) {
-          top6[2] = pixProj;
-        }
-      }
+      const top6 = Array.from(uniqueDbMap.values()).slice(0, 6);
 
       return top6.map(p => ({
         ...p,
@@ -84,37 +67,21 @@ async function getFeaturedProjects(): Promise<Project[]> {
       })) as unknown as Project[];
     }
   } catch (error) {
-    console.warn('MongoDB fetch for featured projects failed, falling back to GitHub API:', error);
+    // Fallback to fetchGitHubUserRepos
   }
 
-  // Fallback: fetch live GitHub repos, excluding portfolio
   try {
     const repos = await fetchGitHubUserRepos('bzwaqar');
     const filteredRepos = repos.filter((r) => r.name.toLowerCase() !== 'portfolio');
 
-    let top6 = filteredRepos.slice(0, 6);
-
-    // 1. Replace bookstore with FIFA repo
-    const fifaRepo = filteredRepos.find((r) => r.name.toLowerCase().includes('fifa'));
-    if (fifaRepo) {
-      const bookstoreIdx = top6.findIndex((r) => r.name.toLowerCase().includes('bookstore'));
-      if (bookstoreIdx !== -1) {
-        top6[bookstoreIdx] = fifaRepo;
-      } else if (!top6.some((r) => r.name.toLowerCase().includes('fifa'))) {
-        top6[4] = fifaRepo;
+    const uniqueMap = new Map<string, typeof filteredRepos[0]>();
+    for (const r of filteredRepos) {
+      const key = r.name.toLowerCase();
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, r);
       }
     }
-
-    // 2. Replace artwork with PixSearch repo
-    const pixRepo = filteredRepos.find((r) => r.name.toLowerCase().includes('pixsearch'));
-    if (pixRepo) {
-      const artworkIdx = top6.findIndex((r) => r.name.toLowerCase().includes('artwork'));
-      if (artworkIdx !== -1) {
-        top6[artworkIdx] = pixRepo;
-      } else if (!top6.some((r) => r.name.toLowerCase().includes('pixsearch'))) {
-        top6[2] = pixRepo;
-      }
-    }
+    const top6 = Array.from(uniqueMap.values()).slice(0, 6);
 
     return top6.map((r) => ({
       _id: String(r.github_id),
@@ -131,8 +98,8 @@ async function getFeaturedProjects(): Promise<Project[]> {
       featured: true,
       published: true,
     })) as unknown as Project[];
-  } catch (err) {
-    console.error('Failed to load fallback featured projects:', err);
+  } catch (error) {
+    console.error('Error fetching featured projects:', error);
     return [];
   }
 }
