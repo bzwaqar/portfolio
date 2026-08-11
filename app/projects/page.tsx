@@ -187,7 +187,7 @@ export default function ProjectsPage() {
         <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center text-gray-500 space-y-3">
           <p className="text-base font-semibold text-gray-900">No published projects found matching your query.</p>
           <p className="text-xs text-gray-500">
-            Publish projects in the <Link href="/admin/projects" className="text-red-600 font-semibold hover:underline">Admin Project Manager</Link> to display them here.
+            Check back soon for new projects or try adjusting your search filters.
           </p>
         </div>
       )}
