@@ -5,7 +5,10 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options: MongoClientOptions = {};
+const options: MongoClientOptions = {
+  serverSelectionTimeoutMS: 3000,
+  connectTimeoutMS: 3000,
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
