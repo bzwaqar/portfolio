@@ -78,21 +78,39 @@ export default function ProjectsPage() {
     loadPublishedProjects();
   }, []);
 
-  // Compute available languages
-  const languages = ['All', ...Array.from(new Set(projects.flatMap((p) => p.languages || [p.language]).filter(Boolean)))];
+  const CATEGORIES = ['All', 'Machine Learning', 'Deep Learning', 'Computer Vision', 'JavaScript'];
 
-  // Filter projects by language and search
+  // Filter projects by classification category and search query
   const filteredProjects = projects.filter((project) => {
-    const projectLangs = project.languages || [project.language];
-    const matchesLanguage =
-      selectedLanguage === 'All' || projectLangs.includes(selectedLanguage);
+    const text = [
+      project.category || '',
+      project.name || '',
+      project.title || '',
+      project.slug || '',
+      project.description || '',
+      project.short_description || '',
+      ...(project.languages || [project.language || '']),
+      ...(project.topics || []),
+      ...(project.technologies || []),
+    ].join(' ').toLowerCase();
+
+    let matchesCategory = true;
+    if (selectedLanguage === 'Computer Vision') {
+      matchesCategory = text.includes('vision') || text.includes('opencv') || text.includes('ocr') || text.includes('facial') || text.includes('image-search') || text.includes('pixsearch');
+    } else if (selectedLanguage === 'Deep Learning') {
+      matchesCategory = text.includes('deep-learning') || text.includes('nlp') || text.includes('pytorch') || text.includes('tensorflow') || text.includes('sentiment') || text.includes('artwork');
+    } else if (selectedLanguage === 'Machine Learning') {
+      matchesCategory = text.includes('machine-learning') || text.includes('scikit-learn') || text.includes('xgboost') || text.includes('prediction') || text.includes('classification') || text.includes('clustering') || text.includes('fraud') || text.includes('fifa') || text.includes('supportdesk') || text.includes('recommender') || text.includes('eda') || text.includes('kmeans') || text.includes('knn') || text.includes('energy');
+    } else if (selectedLanguage === 'JavaScript') {
+      matchesCategory = text.includes('javascript') || text.includes('typescript') || text.includes('react') || text.includes('next') || text.includes('fullstack') || text.includes('bookstore') || text.includes('web');
+    }
 
     const matchesSearch =
       (project.title || project.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (project.short_description || project.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (project.topics && project.topics.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase())));
 
-    return matchesLanguage && matchesSearch;
+    return matchesCategory && matchesSearch;
   });
 
   return (
@@ -108,24 +126,24 @@ export default function ProjectsPage() {
           Published Engineering Projects
         </h1>
         <p className="text-base text-gray-500 max-w-2xl">
-          Explore machine learning models, full-stack applications, and computer vision systems built by Waqar Khan.
+          Explore machine learning models, deep learning systems, computer vision applications, and full-stack JavaScript solutions built by Waqar Khan.
         </p>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* Filter Category Tabs and Search Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-6">
         <div className="flex flex-wrap gap-2">
-          {languages.map((lang) => (
+          {CATEGORIES.map((cat) => (
             <button
-              key={lang}
-              onClick={() => setSelectedLanguage(lang)}
+              key={cat}
+              onClick={() => setSelectedLanguage(cat)}
               className={`rounded-xl px-4 py-2 text-xs font-semibold transition-colors ${
-                selectedLanguage === lang
+                selectedLanguage === cat
                   ? 'bg-red-600 text-white'
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 border border-gray-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 border border-gray-200'
               }`}
             >
-              {lang}
+              {cat}
             </button>
           ))}
         </div>
