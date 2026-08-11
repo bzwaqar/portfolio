@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ProjectCreate } from '@/types/api';
+import { fetchGitHubUserRepos, getProjectImage, getProjectDescription } from '@/lib/github';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,35 +9,66 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const publishedOnly = searchParams.get('published_only') === 'true';
 
-    const db = await getDb();
-    const query: any = {};
+    try {
+      const db = await getDb();
+      const query: any = {};
 
-    if (publishedOnly) {
-      query.published = true;
+      if (publishedOnly) {
+        query.published = true;
+      }
+
+      if (category && category.toLowerCase() !== 'all') {
+        query.$or = [
+          { category: category },
+          { languages: category },
+          { topics: category },
+        ];
+      }
+
+      const projects = await db
+        .collection('projects')
+        .find(query)
+        .sort({ featured: -1, updated_at: -1 })
+        .limit(100)
+        .toArray();
+
+      if (projects && projects.length > 0) {
+        return NextResponse.json(projects);
+      }
+    } catch (dbErr) {
+      console.warn('MongoDB query warning in /api/projects, executing GitHub API fallback:', dbErr);
     }
 
-    if (category && category.toLowerCase() !== 'all') {
-      query.$or = [
-        { category: category },
-        { languages: category },
-        { topics: category },
-      ];
-    }
+    // Fallback: fetch live GitHub repositories
+    const repos = await fetchGitHubUserRepos('bzwaqar');
+    const normalized = repos.map((r) => {
+      const img = getProjectImage(r);
+      const desc = getProjectDescription(r);
+      return {
+        _id: String(r.github_id),
+        github_id: r.github_id,
+        name: r.name,
+        title: r.name,
+        slug: r.name.toLowerCase(),
+        short_description: desc,
+        description: desc,
+        github_url: r.html_url,
+        demo_url: r.demo_url,
+        languages: [r.language],
+        technologies: r.topics,
+        topics: r.topics,
+        stars: r.stargazers_count,
+        forks: r.forks_count,
+        image: img ? { url: img.url, alt: img.alt } : undefined,
+        featured: true,
+        published: true,
+      };
+    });
 
-    const projects = await db
-      .collection('projects')
-      .find(query)
-      .sort({ featured: -1, updated_at: -1 })
-      .limit(100)
-      .toArray();
-
-    return NextResponse.json(projects);
+    return NextResponse.json(normalized);
   } catch (error) {
     console.error('Error fetching projects:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
-    );
+    return NextResponse.json([], { status: 200 });
   }
 }
 
