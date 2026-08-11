@@ -28,7 +28,7 @@ interface DynamicProjectPageProps {
 
 // Fetch single project helper from MongoDB API or local/GitHub fallback
 async function getProjectBySlug(slug: string) {
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || SITE_URL;
   try {
     const res = await fetch(`${backendUrl}/api/projects/${slug}`, { next: { revalidate: 3600 } });
     if (res.ok) {
@@ -89,7 +89,7 @@ async function getProjectBySlug(slug: string) {
 
 // Generate static params for build pre-rendering
 export async function generateStaticParams() {
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || SITE_URL;
   try {
     const res = await fetch(`${backendUrl}/api/projects?published_only=true`, { cache: 'no-store' });
     if (res.ok) {

@@ -18,7 +18,7 @@ export default function ProjectsPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
   useEffect(() => {
     async function loadPublishedProjects() {

@@ -124,7 +124,7 @@ export default function AdminPage() {
             <h2 className="text-xl font-bold text-gray-900">Database & API Status</h2>
             <div className="space-y-2 text-xs text-gray-600 font-mono">
               <div>Database: <span className="text-green-600 font-bold">My_portfolio_data (Atlas)</span></div>
-              <div>Backend Endpoint: <span className="text-red-600">http://localhost:8000</span></div>
+              <div>Backend Engine: <span className="text-green-600 font-bold">Next.js Native API (/api)</span></div>
               <div>GitHub User: <span className="text-red-600">@bzwaqar</span></div>
             </div>
           </div>

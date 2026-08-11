@@ -4,7 +4,7 @@ import { projectsData } from '@/lib/data';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://waqarkhan.dev';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || SITE_URL;
   let publishedProjectRoutes: MetadataRoute.Sitemap = [];
 
   try {

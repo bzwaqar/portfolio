@@ -190,7 +190,7 @@ export function getProjectImage(project: any): { url: string; alt: string } | nu
 
 export async function fetchGitHubUserRepos(username: string = 'bzwaqar'): Promise<GitHubRepository[]> {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || '';
     const backendResponse = await fetch(`${backendUrl}/api/projects?published_only=true`, {
       next: { revalidate: 3600 },
     }).catch(() => null);
