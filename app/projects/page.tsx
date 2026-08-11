@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import RepositoryCard from '@/components/RepositoryCard';
-import { getProjectImage } from '@/lib/github';
+import { getProjectImage, getProjectDescription } from '@/lib/github';
 import Link from 'next/link';
 
 export default function ProjectsPage() {
@@ -48,14 +48,15 @@ export default function ProjectsPage() {
             .filter((r: any) => !r.fork && r.name.toLowerCase() !== 'portfolio')
             .map((r: any) => {
               const img = getProjectImage(r);
+              const desc = getProjectDescription(r);
               return {
                 github_id: r.id,
                 name: r.name,
                 title: r.name.replace(/-/g, ' ').toUpperCase(),
                 slug: r.name.toLowerCase(),
                 github_url: r.html_url,
-                short_description: r.description || 'GitHub repository project.',
-                description: r.description || 'GitHub repository project.',
+                short_description: desc,
+                description: desc,
                 languages: [r.language || 'Python'],
                 stars: r.stargazers_count || 0,
                 forks: r.forks_count || 0,
@@ -99,23 +100,26 @@ export default function ProjectsPage() {
       
       {/* Header section */}
       <div className="space-y-4 border-b border-gray-200 pb-8">
-        {/* MANDATORY EXACTLY ONE H1 FOR PUBLIC PROJECTS PAGE */}
+        <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 border border-red-200">
+          Open-Source & AI Projects
+        </span>
+        {/* MANDATORY EXACTLY ONE H1 FOR PROJECTS PAGE */}
         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-          Featured & Published Projects
+          Published Engineering Projects
         </h1>
         <p className="text-base text-gray-500 max-w-2xl">
-          Curated open-source machine learning models, computer vision systems, and full-stack web applications with optimized WebP project visuals.
+          Explore machine learning models, full-stack applications, and computer vision systems built by Waqar Khan.
         </p>
       </div>
 
-      {/* Filter & Search Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-6">
         <div className="flex flex-wrap gap-2">
           {languages.map((lang) => (
             <button
               key={lang}
               onClick={() => setSelectedLanguage(lang)}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-xl px-4 py-2 text-xs font-semibold transition-colors ${
                 selectedLanguage === lang
                   ? 'bg-red-600 text-white'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 border border-gray-200'
@@ -154,6 +158,7 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
             const img = getProjectImage(project);
+            const desc = getProjectDescription(project);
 
             return (
               <RepositoryCard
@@ -164,7 +169,7 @@ export default function ProjectsPage() {
                   full_name: `bzwaqar/${project.slug || project.name}`,
                   html_url: project.github_url || `https://github.com/bzwaqar/${project.slug}`,
                   demo_url: project.demo_url || '',
-                  description: project.short_description || project.description || '',
+                  description: desc,
                   language: (project.languages && project.languages[0]) || project.language || 'Python',
                   stargazers_count: project.stars || 0,
                   forks_count: project.forks || 0,

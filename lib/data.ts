@@ -275,6 +275,20 @@ export const skillCategoriesData: SkillCategory[] = [
     ]
   },
   {
+    title: 'Computer Vision',
+    description: 'Advanced visual intelligence, real-time object detection, image segmentation, and deep neural vision pipelines.',
+    skills: [
+      'OpenCV',
+      'Object Detection',
+      'Image Segmentation',
+      'YOLO',
+      'Facial Recognition',
+      'PyTorch Vision',
+      'Feature Extraction',
+      'Convolutional Neural Networks (CNNs)'
+    ]
+  },
+  {
     title: 'Web Development',
     description: 'Frontend and backend web technologies for building full-stack applications.',
     skills: ['React.js', 'Node.js', 'Express.js', 'REST APIs', 'HTML', 'CSS', 'JavaScript']

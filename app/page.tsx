@@ -146,18 +146,6 @@ export default async function HomePage() {
       {/* 1. Hero Section (Includes Book Appointment & Animations) */}
       <HeroSection />
 
-      {/* Trust / Logo Strip */}
-      <section className="border-t border-gray-200 bg-gray-50 py-8 relative z-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 md:gap-16">
-            <span className="text-sm font-medium text-gray-400 tracking-wide">Python</span>
-            <span className="text-sm font-medium text-gray-400 tracking-wide">FastAPI</span>
-            <span className="text-sm font-medium text-gray-400 tracking-wide">Next.js</span>
-            <span className="text-sm font-medium text-gray-400 tracking-wide">MongoDB</span>
-          </div>
-        </div>
-      </section>
-
       {/* 2. Skills Section */}
       <SkillsSection />
 

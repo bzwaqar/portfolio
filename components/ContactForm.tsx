@@ -19,15 +19,27 @@ export default function ContactForm() {
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
 
-    // Simulate dummy API request delay
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1000);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error('Failed to submit contact message:', err);
+      setStatus('error');
+    }
   };
 
   return (
@@ -39,7 +51,13 @@ export default function ContactForm() {
 
       {status === 'success' && (
         <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-          ✓ Thank you! Your message placeholder has been received. I will reply shortly.
+          ✓ Thank you! Your message has been sent successfully. I will reply shortly.
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          ✕ Something went wrong while sending your message. Please try emailing directly to bbzwaqar@gmail.com.
         </div>
       )}
 

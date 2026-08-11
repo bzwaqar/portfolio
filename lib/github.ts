@@ -115,6 +115,35 @@ export const PROJECT_IMAGE_MAP: Record<string, { url: string; alt: string }> = {
   },
 };
 
+export const PROJECT_DESCRIPTION_MAP: Record<string, string> = {
+  'fifa-match-predictor-ai':
+    'AI-powered sports analytics engine using Machine Learning to evaluate team metrics, historical performance, and head-to-head statistics for predicting FIFA match outcomes.',
+  'fifa':
+    'AI-powered sports analytics engine using Machine Learning to evaluate team metrics, historical performance, and head-to-head statistics for predicting FIFA match outcomes.',
+};
+
+export function getProjectDescription(project: any): string {
+  if (!project) return 'Software project built with modern technology.';
+  const name = (project.name || project.title || project.slug || '').toLowerCase();
+  if (name.includes('fifa')) {
+    return PROJECT_DESCRIPTION_MAP['fifa-match-predictor-ai'];
+  }
+  const rawDesc = project.short_description || project.description;
+  if (
+    rawDesc &&
+    rawDesc !== 'No description provided.' &&
+    rawDesc !== 'GitHub project.' &&
+    rawDesc !== 'GitHub repository project.'
+  ) {
+    return rawDesc;
+  }
+  const slug = (project.slug || project.name || '').toLowerCase().trim();
+  if (PROJECT_DESCRIPTION_MAP[slug]) {
+    return PROJECT_DESCRIPTION_MAP[slug];
+  }
+  return rawDesc || 'Software project built with modern technology.';
+}
+
 export function getProjectImage(project: any): { url: string; alt: string } | null {
   if (!project) return null;
 
@@ -173,12 +202,13 @@ export async function fetchGitHubUserRepos(username: string = 'bzwaqar'): Promis
           .filter((p: any) => (p.slug || p.name || '').toLowerCase() !== 'portfolio')
           .map((p: any) => {
             const img = getProjectImage(p);
+            const desc = getProjectDescription(p);
             return {
               github_id: p.github_id || 0,
               name: p.title || p.name,
               full_name: `bzwaqar/${p.slug || p.name}`,
               html_url: p.github_url || `https://github.com/bzwaqar/${p.slug}`,
-              description: p.short_description || p.description || 'GitHub project.',
+              description: desc,
               language: (p.languages && p.languages[0]) || p.language || 'Python',
               stargazers_count: p.stars || 0,
               forks_count: p.forks || 0,
@@ -214,12 +244,13 @@ export async function fetchGitHubUserRepos(username: string = 'bzwaqar'): Promis
       .filter((repo: any) => !repo.fork && repo.name.toLowerCase() !== 'portfolio')
       .map((repo: any) => {
         const img = getProjectImage(repo);
+        const desc = getProjectDescription(repo);
         return {
           github_id: repo.id,
           name: repo.name,
           full_name: repo.full_name,
           html_url: repo.html_url,
-          description: repo.description || 'No description provided.',
+          description: desc,
           language: repo.language || 'Python / Code',
           stargazers_count: repo.stargazers_count || 0,
           forks_count: repo.forks_count || 0,
@@ -256,6 +287,21 @@ function getFallbackRepositories(username: string): GitHubRepository[] {
     },
     {
       github_id: 102,
+      name: 'fifa-match-predictor-ai',
+      full_name: `${username}/fifa-match-predictor-ai`,
+      html_url: `https://github.com/${username}/fifa-match-predictor-ai`,
+      description: 'AI-powered sports analytics engine using Machine Learning to evaluate team metrics, historical performance, and head-to-head statistics for predicting FIFA match outcomes.',
+      language: 'Python',
+      stargazers_count: 12,
+      forks_count: 4,
+      topics: ['machine-learning', 'python', 'scikit-learn', 'xgboost', 'fifa'],
+      is_fork: false,
+      updated_at: new Date().toISOString(),
+      image_url: '/images/projects/fifa-match-prediction.webp',
+      image_alt: 'Football match analytics and prediction project',
+    },
+    {
+      github_id: 103,
       name: 'ai-bookstore-fullstack',
       full_name: `${username}/ai-bookstore-fullstack`,
       html_url: `https://github.com/${username}/ai-bookstore-fullstack`,
@@ -271,3 +317,4 @@ function getFallbackRepositories(username: string): GitHubRepository[] {
     },
   ];
 }
+

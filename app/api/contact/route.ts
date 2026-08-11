@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ContactMessageCreate } from '@/types/api';
+import { sendContactEmail } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,22 +25,57 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body: ContactMessageCreate = await request.json();
-    const db = await getDb();
 
-    const newMessage = {
-      ...body,
-      created_at: new Date(),
-      read: false,
-    };
+    // 1. Dispatch email notification to site owner
+    let emailResult: { success: boolean; error?: string } = { success: false, error: 'Not attempted' };
+    try {
+      emailResult = await sendContactEmail({
+        name: body.name,
+        email: body.email,
+        subject: body.subject,
+        message: body.message,
+      });
+    } catch (e: any) {
+      console.error('Email dispatch error in contact API:', e);
+      emailResult = { success: false, error: e.message || String(e) };
+    }
 
-    const result = await db.collection('contact_messages').insertOne(newMessage);
-    const createdMessage = await db.collection('contact_messages').findOne({ _id: result.insertedId });
+    // 2. Store message in MongoDB database if available
+    let createdMessage = null;
+    try {
+      const db = await getDb();
+      const newMessage = {
+        ...body,
+        created_at: new Date(),
+        read: false,
+      };
+      const result = await db.collection('contact_messages').insertOne(newMessage);
+      createdMessage = await db.collection('contact_messages').findOne({ _id: result.insertedId });
+    } catch (dbErr) {
+      console.warn('MongoDB save warning in contact API:', dbErr);
+    }
 
-    return NextResponse.json(createdMessage, { status: 201 });
-  } catch (error) {
-    console.error('Error creating contact message:', error);
+    // If either email was sent OR message was saved in DB, return 201 success!
+    if (emailResult.success || createdMessage) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Contact form received successfully.',
+          email_sent: emailResult.success,
+          email_error: emailResult.error || null,
+        },
+        { status: 201 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create message' },
+      { error: emailResult.error || 'Failed to process message' },
+      { status: 500 }
+    );
+  } catch (error: any) {
+    console.error('Error in contact POST handler:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error processing contact message' },
       { status: 500 }
     );
   }
